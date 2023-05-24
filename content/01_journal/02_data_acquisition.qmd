@@ -1,8 +1,113 @@
 ---
 title: "Data Acquisition"
-author: "Joschka Schwarz"
+author: "Philip C. Riege"
 ---
 
-::: callout-note
-You can delete everything in here and start fresh.
-:::
+# Challenge 2.1
+For the first challenge of this chapter I used an open API providing information about the population numbers of the United States over the past year. I decided to plot the number of inhabitants over the years to show the development.
+```{r}
+#| message: false
+#import libraries
+library(tidyverse)
+library(httr)
+library(jsonlite)
+library(RSQLite)
+library(DBI)
+
+#access API
+resp <- GET("https://datausa.io/api/data?drilldowns=Nation&measures=Population")
+
+#check if API responded successfully
+if (resp$status_code == 200) {
+  print("request has succeeded")
+}
+
+#extract information and form it into a tibble
+US_data_lst <- resp %>%
+  .$content %>%
+  rawToChar() %>%
+  fromJSON()
+
+data_lst <- US_data_lst["data"]$data
+data_tbl <- as_tibble(data_lst) %>%
+  select(Year, Population)
+
+#plot data
+data_tbl %>%
+  ggplot(aes(x = Year, y = Population)) +
+  # Geometries
+  geom_col(fill = "#2DC6D6") + # Use geom_col for a bar plot
+  geom_smooth(method = "lm", se = FALSE) + # Adding a trendline
+  
+  # Formatting
+  # scale_y_continuous(labels = scales::dollar) + # Change the y-axis. 
+  # Again, we have to adjust it for euro values
+  scale_y_continuous(labels = scales::dollar_format(big.mark = ".", 
+                                                    decimal.mark = ",", 
+                                                    prefix = "", 
+                                                    suffix = "")) +
+  labs(
+    title    = "US Population per year",
+    x = "", # Override defaults for x and y
+    y = "Inhabitants"
+  )
+
+```
+
+# Challenge 2.2
+For the second challenge, the goal was to create a small database of bike models (their names and prices) from one of Canyons rivaling companies, namely ROSE or Radon. Since I recently ordered a roadbike from ROSE, I went with their website. I confined myself to the category of roadbikes.
+
+```{r}
+#| message: false
+#import libraries
+library(tidyverse) 
+library(rvest)     
+library(glue)      
+
+#scraping rose bikes for their road bike models
+home_url <- "https://www.rosebikes.com"
+url_roadbikes <- "https://www.rosebikes.com/bikes/road"
+
+#get the url of every model of the category road bike
+get_urls <- function(category_url){
+  
+  html_roadbikes <- read_html(category_url)
+  
+  bike_url_tbl <- html_roadbikes %>%
+    html_nodes(css = ".catalog-category-bikes__content > a") %>%
+    html_attr("href") %>%
+    enframe(name = "position", value = "url") %>%
+    mutate(url = glue("{home_url}{url}"))
+  
+  return(bike_url_tbl)
+}
+
+bike_url_tbl <- get_urls(url_roadbikes)
+
+#get the name and price of each model
+get_bike_data <- function(url){
+  
+  html_model <- read_html(url)
+  
+  names <- html_model %>%
+    html_nodes(css = ".catalog-category-model__title") %>%
+    html_text() %>%
+    str_trim() %>%
+    enframe(name = "position", value = "name")
+  
+  prices <- html_model %>%
+    html_nodes(css = ".catalog-category-model__price-current") %>%
+    html_text() %>%
+    str_trim() %>%
+    enframe(name = "position", value = "price")
+  
+  bike_data <- names %>%
+    left_join(prices, by = join_by(position)) %>%
+    distinct(name, price)
+  
+  return(bike_data)
+}
+
+database <- map(bike_url_tbl$url, get_bike_data)
+database
+```

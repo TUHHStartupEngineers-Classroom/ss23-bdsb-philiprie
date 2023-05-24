@@ -1,21 +1,11 @@
 ---
 title: "My Lab Journal"
 subtitle: "Business Data Science Basics"
-author: "Joschka Schwarz"
+author: "Philip C. Riege"
 ---
 
 ![](assets/logo/TIE_logo.svg){width=80% fig-align="center"}
 
-This is a template example for lab journaling. Students in the data science courses at the Institute of Entrepreneurship will use this template to learn R for business analytics. Students can replace this text as they wish.
+Welcome! This website functions as the lab journal for the Business Data Science Basics module. In the menu above you can find the journals I have prepared for the four different chapters and the challenges each presented. I hope that the results presented match the criteria for passing this class, some challenges turned out to be quite tough, but overall they helped in the understanding and were interesting. I had some difficulties with the last challenge, where a world map was to be plotted, I hope that is not an issue.
 
-## How to use
-
-1. Accept the assignment and get your own github repo.
-
-2. Blog/journal what you are doing in R, by editing the `.qmd` files. 
-
-3. See the links page for lots of helpful links on learning R.
-
-4. Change everything to make it your own.
-
-5. Make sure to render you website everytime before you want to upload changes
+I did not alter the files for the Class notes nor the Links.
